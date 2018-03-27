@@ -61,6 +61,29 @@ class Datareceive_tesla(object):
         return data
 
 
+    def retrieve_data(self, datatype, json_parameters):
+        headers = {"Authorization": "Bearer %s" % self.accescodetesla}
+        request = Request('https://owner-api.teslamotors.com/api/1/vehicles/{}/data_request/{}'.format(self.vehicleid, datatype), headers=headers)
+        response_body = urlopen(request)
+        data = json.load(response_body)
+
+        json_parameters.insert(0, "timestamp") 
+        retrived_data = []
+
+        for item in json_parameters:
+            tree_obj = objectpath.Tree(data)
+            tree_obj_query_string = []
+            tree_obj_query_string.append('$..')
+            tree_obj_query_string.append(item)
+            tree_obj_query = ''.join(tree_obj_query_string)
+            json_data =  tuple(tree_obj.execute(tree_obj_query))
+            retrived_data.append(json_data[0])
+#        print("battery_range:")
+
+        return retrived_data
+
+
+
 class Data_hereapi(object):
 
     def __init__(self, AppID, AppCode):
