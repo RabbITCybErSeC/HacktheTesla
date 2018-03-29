@@ -1,6 +1,7 @@
 import mysql.connector    
 from tesla import Datareceive_tesla
 import objectpath
+import datetime
 
 class DBoperator(object):
     def __init__(self):
@@ -18,16 +19,27 @@ class DBoperator(object):
         cnx = mysql.connector.connect(user=self.user, password=self.password,
                         host=self.host,
                         database=self.database)
-        row_values = "("
+
+        database_values[0] = database_values[0] / 1000
+        readable_timestamp = datetime.datetime.fromtimestamp(database_values[0]).strftime('%Y-%m-%d %H:%M:%S')
+        
+        print("database_values[0]")
+        print(database_values[0])
+        row_values = "(" + r'"' + readable_timestamp + r'"'
         for i in range(len(database_values)):
-            row_values += str(database_values[i])
+            if (i!=0):
+                row_values += str(database_values[i])
             if i != len(database_values) - 1:
                 row_values += ","        
         row_values += ");"
+        print("printing row values")
         print(row_values)
         push_row_sql = """
-            INSERT INTO location_logs
+            INSERT INTO """ + table_name + """
             VALUES """ + row_values
+        
+        print("push_row_sql")
+        print(push_row_sql)
 
         try:
             cursor = cnx.cursor()
