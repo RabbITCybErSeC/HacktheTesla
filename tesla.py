@@ -79,7 +79,6 @@ class Datareceive_tesla(object):
             tree_obj_query = ''.join(tree_obj_query_string)
             json_data =  tuple(tree_obj.execute(tree_obj_query))
             retrived_data.append(json_data[0])
-#        print("battery_range:")
 
         return retrived_data
 
