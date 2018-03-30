@@ -2,61 +2,88 @@
 https://timdorr.docs.apiary.io/ , """
 
 from tesla import *
-import threading
+from dBoperator import *
 import schedule          # """This import needs a external download"""
 import time
+
+
+# to get the data insert the datatype: The following datatypes can be used, climate_state, drive_state, gui_settings, vehicle_state,  charge_state. Insert these to get the right
+# data that is wanted. Documentation on the data can be found at the following website:
+
+
 if __name__ == '__main__':
 
     myUI = UI()
-    myUI.Start()
-    mycar = Datareceive_tesla("")
-    mycar.get_Token()
+    database = DBoperator()
     cal = CalculatorClass()
+    myUI.Start()
+
+    mycar = Datareceive_tesla(myUI.username,myUI.password)
+    mycar.get_Token()
     mycar.get_carlistdata()
 
 
-    shift = "D"
-
-
     def push_efficientcy():
+        print("check1")
 
         try:
-            if mycar.get_data('drive_state')['response']['speed']  == None and shift == "D":
+            state_check = mycar.retrieve_data("drive_state",["shift_state","speed"])
+        except Exception as e:
+            print(e)
+            print("Unable to load data")
 
-                print("hello world")
+
+
+        try:
+
+            if state_check[1]  != None and state_check[2] == "D":
+                print("Car is driving")
+                response = mycar.retrieve_data("charge_state", ["est_battery_range", "ideal_battery_range"])
+                data_push = []
+                data_push.append(response[0])
+                data_push.append(cal.efficiency(response[1], response[2]))
+                database.push_to_database("drive_efficiency", data_push)
+                print("Database update succesful")
+
             else:
-                print("not printed")
+                print("No Update")
         except:
             print("failed to push data")
-    schedule.every(1).minutes.do(push_efficientcy)
+
 
     def push_charging():
+        print("check2")
+        priceKWH = 0.25
+
         battery_logged = False
 
         try:
-            if data == "Engaged" and data2 > 0:
+            state_check = mycar.retrieve_data("charge_state",["charge_port_latch", "charger_power", "charge_energy_added"])
+
+
+        except Exception as e:
+            print(e)
+            print("Unable to load data")
+
+        try:
+            if state_check[1] == "Engaged" and state_check[2] > 0:
+
                 battery_logged = True
-            if data == "Blocking" and battery_logged == True:
+                print("check")
+
+            if state_check[1] == "Blocking" and battery_logged == True:
+
+                state_check = mycar.retrieve_data("charge_state",["charge_port_latch", "charger_power", "charge_energy_added"])
+                
+                data_push = []
+                data_push.append(state_check[0])
+                data_push.append(cal.price_calculator(state_check[3], priceKWH))
+                data_push.append(state_check[3])
+                database.push_to_database("charge_logs", data_push)
                 battery_logged = False
 
-                cal.price_calculator()
-                pushdata
         except:
             print("failed to push data")
-
-
-
-
-
-        
-    push_efficientcy()
-    
-    # print(mycar.get_data("charge_state"))
-    # print(mycar.get_data("drive_state"))
-    # print(mycar.get_data('drive_state')['response']['speed'])
-
-
-
 
     def UI():
         app = gui()
@@ -66,46 +93,10 @@ if __name__ == '__main__':
         app.setGoogleMapMarker("m1","{},{}".format(mycar.get_data('drive_state')['response']['latitude'],mycar.get_data('drive_state')['response']['longitude']), size=None, colour=None, label=None, replace=False)
         app.go()
 
+    schedule.every(1).minutes.do(push_efficientcy)
+    schedule.every(1).minutes.do(push_charging)
 
-    def main():
-        print(mycar.get_data("charge_state"))
-    main()
-    UI()
-
-
-
- 
-        
-
-
-
-    #some test comment
-
-
-
-
-
-    # def update():
-    #     
-    #
-    # def prec():
-    #
-    #     schedule.every(1).seconds.do(print(str(cal.efficiency(mycar.get_data("charge_state")['response']['est_battery_range'],mycar.get_data("charge_state")['response']['ideal_battery_range']))+"%"))
-    # def update2():
-    #     schedule.every(1).seconds.do(prec)
-    #
-    # t1= threading.Thread(update2())
-    #
-    # t2=threading.Thread(update())
-    # t1.start
-    # t2.start
-    # t1.join
-    # t2.join
-    #
-    #
-
-
-
+    # UI()
 
 
     while True:
