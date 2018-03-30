@@ -6,7 +6,7 @@ import datetime
 class DBoperator(object):
     def __init__(self):
         print("object created")
-        file = open("../creds.txt", "r") 
+        file = open("creds.txt", "r")
         parameters = file.read().splitlines() 
         self.user = parameters[0]
         self.password = parameters[1]
