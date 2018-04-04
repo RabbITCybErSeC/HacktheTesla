@@ -19,8 +19,6 @@ class Datareceive_tesla(object):
         self.accescodetesla =0
         self.vehicleid= 0
         self.vehicle_engery_amout = {}
-        self.latitude=38.75807927603043
-        self.longitude=-9.03741754643809
         self.email = email
         self.password = password
 
@@ -41,7 +39,7 @@ class Datareceive_tesla(object):
         else:
             print (req.reason)
 
-    def get_carlistdata(self):
+    def get_carlistdata(self): 
          headers = {"Authorization": "Bearer %s" % self.accescodetesla}
          request = Request('https://owner-api.teslamotors.com/api/1/vehicles', headers=headers)
          response_body=urlopen(request)
@@ -61,8 +59,9 @@ class Datareceive_tesla(object):
         data = json.load(response_body)
         return data
 
+    #returns an array of values from specified data table of API. Values are obtained by being searched with json_parameters 
 
-    def retrieve_data(self, datatype, json_parameters):
+    def retrieve_data(self, datatype, json_parameters): 
         headers = {"Authorization": "Bearer %s" % self.accescodetesla}
         request = Request('https://owner-api.teslamotors.com/api/1/vehicles/{}/data_request/{}'.format(self.vehicleid, datatype), headers=headers)
         response_body = urlopen(request)
@@ -81,38 +80,6 @@ class Datareceive_tesla(object):
             retrived_data.append(json_data[0])
 
         return retrived_data
-
-
-
-class Data_hereapi(object):
-
-    def __init__(self, AppID, AppCode):
-            self.AppID = AppID
-            self.AppCode = AppCode
-            self.baseURL = "https://geocoder.cit.api.here.com/6.2/geocode.json"
-
-    def get_data_hereMaps(self):
-
-
-        requestParameters = []
-        requestParameters.append(self.baseURL)
-        requestParameters.append("?searchtext=")
-        requestParameters.append("200%20S%20Mathilda%20Sunnyvale%20CA&")  # hardcoding for trying out
-        requestParameters.append("app_id=")
-        requestParameters.append(self.AppID)
-        requestParameters.append("&app_code=")
-        requestParameters.append(self.AppCode)
-        requestParameters.append("&gen=8")
-
-        requestURL = ''.join(requestParameters)
-
-        request = Request(requestURL)
-
-        response_body = urlopen(request)
-        data = json.load(response_body)
-        print(data)
-        return requestURL
-
 
 class CalculatorClass(object):
 
