@@ -3,10 +3,13 @@ from tesla import Datareceive_tesla
 import objectpath
 import datetime
 
+#the handler class for dealing with database operation
+
 class DBoperator(object):
     def __init__(self):
         print("object created")
-        file = open("creds.txt", "r")
+        file = open("creds.txt", "r") #mysql database credentials are stored in a txt file, without putting it to the github repo
+        #TODO there should be a better way to do this
         parameters = file.read().splitlines() 
         self.user = parameters[0]
         self.password = parameters[1]
@@ -14,17 +17,19 @@ class DBoperator(object):
         self.database = parameters[3]
         file.close()         
 
+    #pick the db table and push to each column 
     def push_to_database(self,table_name,database_values):
         
         cnx = mysql.connector.connect(user=self.user, password=self.password,
                         host=self.host,
                         database=self.database)
 
-        database_values[0] = database_values[0] / 1000
-        readable_timestamp = datetime.datetime.fromtimestamp(database_values[0]).strftime('%Y-%m-%d %H:%M:%S')
+        database_values[0] = database_values[0] / 1000 #need to convert milisecond to seconds
+        readable_timestamp = datetime.datetime.fromtimestamp(database_values[0]).strftime('%Y-%m-%d %H:%M:%S') #formatting timestamp do datetime
         
         print("database_values[0]")
         print(database_values[0])
+        #creating MYQL statement string
         row_values = "(" + r'"' + readable_timestamp + r'"'
         for i in range(len(database_values)):
             if (i!=0):
